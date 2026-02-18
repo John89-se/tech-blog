@@ -1,0 +1,36 @@
+---
+title: "爆速でUIを作る！Tailwind CSSの活用術"
+date: "2026-02-21"
+excerpt: "CSSファイルを行ったり来たりするのはもう終わり。ユーティリティファーストなCSSフレームワークの魅力。"
+tags: ["TailwindCSS", "CSS", "Design"]
+---
+
+# CSSファイルを書かない開発スタイル
+
+Webサイトの見た目を作るとき、HTMLとCSSファイルを行ったり来たりしていませんか？
+**Tailwind CSS** を使えば、HTMLの中にクラス名を書くだけで完結します。
+
+## メリット1: クラス名を考えなくていい
+
+`.main-header-wrapper-inner` みたいな長いクラス名をひねり出す時間は無駄です。
+Tailwindなら `flex items-center justify-between p-4` と書くだけ。直感的です。
+
+## メリット2: デザインの一貫性が保たれる
+
+「パディングは10pxだっけ？12pxだっけ？」
+Tailwindは `p-2` (0.5rem), `p-4` (1rem) のように、予め定義されたスペーシングを使います。
+誰が書いても、ズレのない綺麗なレイアウトになります。
+
+## よく使うクラス 3選
+
+1.  **Flexbox**: `flex items-center justify-center`
+    *   これで要素をど真ん中に配置できます。
+2.  **Grid**: `grid grid-cols-3 gap-4`
+    *   レスポンシブな3列レイアウトも一瞬です。
+3.  **Hover**: `bg-blue-500 hover:bg-blue-700`
+    *   マウスを乗せた時の動作も、プレフィックスをつけるだけ。
+
+## まとめ
+
+最初はクラス名の多さに圧倒されるかもしれませんが、VS Codeの拡張機能（IntelliSense）を入れれば候補が出るので暗記は不要です。
+これからのWeb開発には必須のスキルです！

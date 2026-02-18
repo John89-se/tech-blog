@@ -1,0 +1,46 @@
+---
+title: "React Hooks完全ガイド：useStateとuseEffectの使い方"
+date: "2026-02-24"
+excerpt: "React開発の要、Hooks。まずはこの2つを完璧に理解しよう。"
+tags: ["React", "JavaScript", "Frontend"]
+---
+
+# HooksなくしてReactは語れない
+
+クラスコンポーネントの時代は終わりました。
+現在は **Hooks** を使って関数コンポーネントに機能を持たせるのが標準です。
+
+## 1. useState: 状態（データ）を持つ
+
+画面上の「変化する値」を管理します。
+
+```jsx
+const [count, setCount] = useState(0);
+
+// 値を変えるときは必ずset関数を使う
+// ❌ count = 1;
+// ⭕ setCount(1);
+```
+
+これが更新されると、Reactは自動的に画面を再描画してくれます。
+
+## 2. useEffect: 副作用を扱う
+
+「副作用（Side Effects）」とは、データのフェッチやDOMの書き換えなど、レンダリング以外の処理のことです。
+
+```jsx
+useEffect(() => {
+  console.log("マウント時に1回だけ実行");
+}, []); // 依存配列が空なら1回だけ
+
+useEffect(() => {
+  console.log("countが変わるたびに実行");
+}, [count]);
+```
+
+## 注意点
+
+*   **トップレベルで呼ぶ**: `if` 文の中で Hooks を呼んではいけません。
+*   **依存配列を正しく設定する**: `useEffect` の依存配列（第2引数）を忘れると、無限ループの原因になります。
+
+まずはこの2つをマスターしましょう！
