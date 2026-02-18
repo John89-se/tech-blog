@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
@@ -42,11 +43,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja">
+    <html lang="ja" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} antialiased bg-background text-foreground`}
+        className={`${inter.variable} ${jetbrainsMono.variable} antialiased bg-background text-foreground flex flex-col min-h-screen`}
       >
-        {children}
+        <main className="flex-1">{children}</main>
+        <footer className="py-6 border-t md:px-8 bg-background">
+          <div className="container flex flex-col md:flex-row items-center justify-between gap-4 mx-auto max-w-3xl">
+            <p className="text-sm text-muted-foreground">
+              © 2026 Tech Blog. Built with Next.js.
+            </p>
+            <nav className="flex gap-4 text-sm text-muted-foreground">
+              <Link href="/contact" className="hover:underline">お問い合わせ</Link>
+            </nav>
+          </div>
+        </footer>
       </body>
     </html>
   );
