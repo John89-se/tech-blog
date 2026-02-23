@@ -15,12 +15,9 @@ export default function Contact() {
 
             <div className="not-prose mt-8 p-6 bg-secondary rounded-lg text-center">
                 <p className="text-muted-foreground mb-2">Email Address</p>
-                <a href="mailto:contact@example.com" className="text-xl font-bold text-primary hover:underline">
-                    contact@example.com
+                <a href="mailto:sho123331sho@gmail.com" className="text-xl font-bold text-primary hover:underline">
+                    sho123331sho@gmail.com
                 </a>
-                <p className="text-xs text-muted-foreground mt-4">
-                    ※ スパム防止のため、@example.comを適切なドメインに変更して送信してください。
-                </p>
             </div>
 
             <p className="mt-8">
