@@ -50,13 +50,16 @@ export default async function BlogPost({ params }: Props) {
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <time dateTime={post.date}>{post.date}</time>
                     <div className="flex gap-2">
-                        {post.tags.map((tag) => (
-                            <Link key={tag} href={`/tags/${tag}`}>
-                                <span className="bg-secondary px-2 py-1 rounded-md text-xs font-medium text-secondary-foreground hover:bg-secondary/80 transition-colors">
-                                    #{tag}
-                                </span>
-                            </Link>
-                        ))}
+                        {post.tags.map((tag) => {
+                            const tagSlug = tag.toLowerCase().replace(/\s+/g, '-');
+                            return (
+                                <Link key={tag} href={`/tags/${tagSlug}`}>
+                                    <span className="bg-secondary px-2 py-1 rounded-md text-xs font-medium text-secondary-foreground hover:bg-secondary/80 transition-colors">
+                                        #{tag}
+                                    </span>
+                                </Link>
+                            );
+                        })}
                     </div>
                 </div>
             </div>

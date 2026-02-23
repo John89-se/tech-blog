@@ -22,13 +22,16 @@ export default function Home() {
               <time dateTime={date} className="text-muted-foreground">
                 {date}
               </time>
-              {tags && tags.map(tag => (
-                <Link key={tag} href={`/tags/${tag}`}>
-                  <span className="relative z-10 rounded-full bg-secondary px-3 py-1.5 font-medium text-secondary-foreground hover:bg-secondary/80 transition-colors">
-                    {tag}
-                  </span>
-                </Link>
-              ))}
+              {tags && tags.map(tag => {
+                const tagSlug = tag.toLowerCase().replace(/\s+/g, '-');
+                return (
+                  <Link key={tag} href={`/tags/${tagSlug}`}>
+                    <span className="relative z-10 rounded-full bg-secondary px-3 py-1.5 font-medium text-secondary-foreground hover:bg-secondary/80 transition-colors">
+                      {tag}
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
             <h3 className="mt-3 text-2xl font-semibold leading-6 group-hover:text-primary">
               <Link href={`/blog/${slug}`}>
