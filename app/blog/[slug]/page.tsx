@@ -3,7 +3,6 @@ import { CompileMDXResult, MDXRemote } from "next-mdx-remote/rsc";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from 'next';
-import AdPlaceholder from "@/components/AdPlaceholder";
 
 type Props = {
     params: Promise<{ slug: string }>;
@@ -66,10 +65,6 @@ export default async function BlogPost({ params }: Props) {
 
             <div className="prose prose-slate dark:prose-invert max-w-none">
                 <MDXRemote source={post.content} />
-            </div>
-
-            <div className="mt-12">
-                <AdPlaceholder />
             </div>
         </article>
     );
