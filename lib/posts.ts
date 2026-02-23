@@ -67,11 +67,13 @@ export function getPostData(slug: string): Post | null {
     } as Post;
 }
 
-export function getPostsByTag(tag: string): Post[] {
+export function getPostsByTag(tagSlug: string): Post[] {
     const allPosts = getSortedPostsData();
-    return allPosts.filter((post) =>
-        post.tags && post.tags.map(t => t.toLowerCase()).includes(tag.toLowerCase())
-    );
+    return allPosts.filter((post) => {
+        if (!post.tags) return false;
+        const slugs = post.tags.map(t => t.toLowerCase().replace(/\s+/g, '-'));
+        return slugs.includes(tagSlug.toLowerCase());
+    });
 }
 
 export function getAllTags(): string[] {

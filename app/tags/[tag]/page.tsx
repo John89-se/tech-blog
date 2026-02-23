@@ -9,7 +9,7 @@ type Props = {
 export async function generateStaticParams() {
     const tags = getAllTags();
     return tags.map((tag) => ({
-        tag: tag.toLowerCase(),
+        tag: tag.toLowerCase().replace(/\s+/g, '-'),
     }));
 }
 
@@ -23,8 +23,12 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function TagPage({ params }: Props) {
     const { tag } = await params;
-    const decodeTag = decodeURIComponent(tag);
-    const posts = getPostsByTag(decodeTag);
+
+    // Find the original tag name to display
+    const allTags = getAllTags();
+    const originalTag = allTags.find(t => t.toLowerCase().replace(/\s+/g, '-') === tag.toLowerCase()) || tag;
+
+    const posts = getPostsByTag(tag);
 
     if (posts.length === 0) {
         notFound();
@@ -37,7 +41,7 @@ export default async function TagPage({ params }: Props) {
                     ← Back to Home
                 </Link>
                 <h1 className="text-3xl font-bold tracking-tight mb-2">
-                    Posts tagged with <span className="text-primary">"#{decodeTag}"</span>
+                    Posts tagged with <span className="text-primary">"#{originalTag}"</span>
                 </h1>
             </header>
 
