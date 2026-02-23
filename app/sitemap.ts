@@ -5,7 +5,7 @@ export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
     const posts = getSortedPostsData();
-    const baseUrl = "https://your-domain.com";
+    const baseUrl = "https://techblog1.com";
 
     const postsUrls = posts.map((post) => ({
         url: `${baseUrl}/blog/${post.slug}`,

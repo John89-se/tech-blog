@@ -21,11 +21,11 @@ export const metadata: Metadata = {
     default: "Tech Blog",
   },
   description: "A modern tech blog built with Next.js",
-  metadataBase: new URL("https://your-domain.com"),
+  metadataBase: new URL("https://techblog1.com"),
   openGraph: {
     title: "Tech Blog",
     description: "Tips on monetizing your coding skills.",
-    url: "https://your-domain.com",
+    url: "https://techblog1.com",
     siteName: "Tech Blog",
     locale: "ja_JP",
     type: "website",
