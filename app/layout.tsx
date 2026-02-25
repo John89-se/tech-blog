@@ -62,6 +62,7 @@ export default function RootLayout({
               © 2026 Tech Blog. Built with Next.js.
             </p>
             <nav className="flex gap-4 text-sm text-muted-foreground">
+              <Link href="/about" className="hover:underline">運営者情報</Link>
               <Link href="/contact" className="hover:underline">お問い合わせ</Link>
             </nav>
           </div>
