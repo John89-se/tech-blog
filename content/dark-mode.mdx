@@ -1,34 +1,138 @@
 ---
-title: "目に優しいダークモードの実装：Tailwind CSS編"
+title: "目に優しいダークモードの実装：Tailwind CSSとNext.jsで完璧な切り替えを作る"
 date: "2026-02-14"
-excerpt: "エンジニアは暗い画面が好き。OSの設定に合わせて自動で切り替わるダークモードの仕組み。"
-tags: ["TailwindCSS", "Design", "Dark Mode"]
+excerpt: "エンジニアは暗い画面が好き。OSの設定に合わせて自動で切り替わるだけでなく、手動でサクサク切り替えられるダークモードの仕組みをTailwind CSSで実現する方法を解説します。"
+tags: ["TailwindCSS", "Design", "Dark Mode", "Next.js"]
 ---
 
+近年、OS（WindowsやMac、iOSやAndroid）の標準機能としてすっかり定着した「**ダークモード（Dark Mode）**」。
+エンジニアのエディタやターミナル画面が黒いのは昔からの伝統ですが、現在では一般のWebサイトやアプリでも、ユーザーが好みに応じてライトテーマ（白背景）とダークテーマ（黒背景）を選択できるのが当たり前のUI/UXになりつつあります。
 
+ダークモードには「デザインがカッコいい」という見た目の問題だけでなく、有機ELディスプレイを使用しているスマホバッテリーの省電力化や、夜間の暗い部屋で画面を見た際の目の疲労を軽減するといった実用的なメリットが存在します。
 
-単純に「カッコいいから」だけではありません。
-有機ELディスプレイの省電力化や、夜間の目の負担軽減など、実用的なメリットがあります。
+この記事では、モダンなCSSフレームワークである「**Tailwind CSS**」と「**Next.js**」を組み合わせて、シンプルかつ完璧なダークモード切り替え機能を実装する方法をステップバイステップで解説します。
 
-## Tailwind CSSでの実装
+---
 
-Tailwindなら驚くほど簡単です。
-`dark:` というプレフィックスをつけるだけです。
+## 1. Tailwind CSSがダークモードを魔法のように簡単にする理由
+
+従来の素のCSSでダークモードを実装しようとすると、`@media (prefers-color-scheme: dark)` というメディアクエリを使ってCSSを書き分けたり、JavaScriptで `<body>` タグに `dark` クラスを付与してCSS変数を切り替えたりと、かなりの労力とコード量が必要でした。
+
+しかし、Tailwind CSSを使えばその苦労は一瞬で消え去ります。
+Tailwindでは、**`dark:` というプレフィックス（接頭辞）をクラス名の前につけるだけ**で、ダークモード専用のスタイルを適用できるからです。
+
+### 驚くほど簡単な実装例
 
 ```html
-<div class="bg-white text-black dark:bg-gray-900 dark:text-white">
-  こんにちは！
+<!-- 
+  通常時 (ライトモード): 背景は白(bg-white)、文字は黒(text-black)
+  ダークモード時: 背景は濃いグレー(bg-gray-900)、文字は白(text-white)
+-->
+<div class="bg-white text-black dark:bg-gray-900 dark:text-white p-6 rounded-lg shadow-md">
+  <h1 class="text-2xl font-bold">こんにちは！</h1>
+  <p class="mt-2 text-gray-600 dark:text-gray-300">
+    これはダークモード対応のコンポーネントです。
+  </p>
 </div>
 ```
 
-これだけで、ユーザーのOS設定（ライト/ダーク）に合わせて自動で色が切り替わります。
+上記のコードを書くだけで、ユーザーのOS（OSの設定画面でライト/ダークを切り替えた際）にリアルタイムに連動して、コンポーネントの色が自動的に切り替わります。これがTailwindの魔法です。
 
-## 手動切り替えボタンを作る
+## 2. OS連動だけでなく「手動切り替えボタン」を作る
 
-「OSはライトだけど、このサイトだけダークにしたい」というユーザーのために、トグルボタンを作ると親切です。
-`next-themes` というライブラリを使うと、チラつき（FOUC）なしで簡単に実装できます。
+OSの設定に連動する仕組み（`media` 戦略）だけでも十分素晴らしいのですが、実際のWebサイトでは「OSはライトモードで使っているけれど、このサイトを見るときだけはダークモードにしたい」というユーザーの要望に応える必要があります。
 
-## デザインのコツ
+そのためには、サイト内に太陽と月のアイコンのような「テーマ切り替えボタン」を設置し、ユーザーが手動でモードを切り替えられるように（そしてその設定をブラウザに記憶させられるように）するのがベストプラクティスです。
 
-真っ黒 (`#000000`) よりも、少しグレーがかった黒 (`#1a1a1a` など) の方が、コントラストが強すぎず目に優しいと言われています。
-Tailwindの `slate-900` や `zinc-900` あたりがおすすめです。
+Tailwind CSSの `tailwind.config.js` で、ダークモードの判定基準を **`class`** に変更します。
+
+```javascript
+// tailwind.config.js
+module.exports = {
+  darkMode: 'class', // 'media' から 'class' に変更
+  // ...
+}
+```
+これにより、HTMLの最上位要素（`<html>` タグなど）に `class="dark"` が付与されている時だけ、`dark:` プレフィックスの装飾が有効になるようになります。
+
+## 3. Next.js で `next-themes` を使った完璧な実装
+
+ReactやNext.jsで「手動切り替え」を自作しようとすると、一つの大きな壁にぶつかります。それは**「FOUC (Flash of Unstyled Content) ＝ 一瞬のチラつき」**です。
+
+ユーザーが過去にダークモードを選択していた場合、その情報を `localStorage` などに保存しておきます。しかし、ページが表示される一瞬だけ白背景（デフォルト）が表示され、その直後にJavaScriptが実行されて黒背景にパッと切り替わる、という非常に不格好な挙動になりがちです。
+
+この問題を完璧に解決してくれるのが、**`next-themes`** というライブラリです。
+
+### 導入手順
+
+まずはライブラリをインストールします。
+
+```bash
+npm install next-themes
+```
+
+次に、Next.jsの `app/layout.tsx` (App Routerの場合) を開き、`ThemeProvider` でアプリケーション全体を囲みます。
+
+```tsx
+// app/layout.tsx
+import { ThemeProvider } from 'next-themes'
+
+export default function RootLayout({ children }) {
+  return (
+    // suppressHydrationWarning はNext.js特有のエラーを防ぐおまじないです
+    <html lang="ja" suppressHydrationWarning>
+      <body>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+        </ThemeProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+これで準備は完了です！
+あとは、切り替えボタンとなるコンポーネントの中で `useTheme` フックを呼び出すだけで、完璧なテーマ切り替えボタンが完成します。
+
+```tsx
+// components/ThemeToggle.tsx
+'use client' // クライアントコンポーネントであることを明示
+
+import { useTheme } from 'next-themes'
+import { useEffect, useState } from 'react'
+
+export function ThemeToggle() {
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  // ハイドレーションエラーを防ぐため、マウントされるまで何も表示しない
+  useEffect(() => setMounted(true), [])
+  if (!mounted) return null
+
+  return (
+    <button
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      className="p-2 bg-gray-200 dark:bg-gray-800 rounded"
+    >
+      {theme === 'dark' ? '🌞 ライトモードへ' : '🌙 ダークモードへ'}
+    </button>
+  )
+}
+```
+
+## 4. 目に優しいダークデザインのコツ
+
+技術的な実装ができたら、最後は「色使いのデザイン」についてお話しします。
+
+ダークモードをデザインする際、**背景色を真っ黒 (`#000000`) にし、文字を真っ白 (`#FFFFFF`) にするのは、実はNG**（アンチパターン）とされています。
+コントラスト比が強すぎるため、暗闇で見た際に文字が光って滲んで見え（ハレーション）、かえって目に負担をかけてしまうからです。
+
+### デザイナーが使うおすすめのカラーパレット
+*   **背景色:** 少しグレーがかった黒色を選択します。Tailwindであれば `bg-gray-900` (`#111827`) や、少し青みがかった `bg-slate-900` (`#0f172a`)、マットな `bg-zinc-900` (`#18181b`) あたりが、非常に落ち着いていてプロフェッショナルな印象を与えます。
+*   **文字色:** 背景の黒に対して浮かび上がりすぎないよう、少しグレーを帯びた白色を使用します。`text-gray-100` や `text-gray-300` などがおすすめです。
+
+## まとめ
+
+Tailwind CSSの `dark:` プレフィックスと、Next.jsの `next-themes` ライブラリの組み合わせは、現代のフロントエンド開発におけるダークモード実装の「最適解」と言えるほど快適なものです。
+
+ユーザーに選ぶ自由を提供し、より長く快適に滞在してもらえるWebサイトを作るために、あなたのプロジェクトにもぜひダークモードを取り入れてみてください！

@@ -64,6 +64,7 @@ export default function RootLayout({
             <nav className="flex gap-4 text-sm text-muted-foreground">
               <Link href="/about" className="hover:underline">運営者情報</Link>
               <Link href="/contact" className="hover:underline">お問い合わせ</Link>
+              <Link href="/privacy-policy" className="hover:underline">プライバシーポリシー</Link>
             </nav>
           </div>
         </footer>
