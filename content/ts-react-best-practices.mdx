@@ -1,0 +1,137 @@
+---
+title: "React × TypeScript：堅牢なコンポーネントを作るための3つのベストプラクティス"
+date: "2026-03-03"
+excerpt: "ReactプロジェクトでTypeScriptを導入したものの、何でもanyで誤魔化していませんか？保守性と安全性を飛躍的に高める、現場の具体的な型定義テクニック。"
+tags: ["React", "TypeScript", "Frontend", "Engineering"]
+---
+
+現在、中〜大規模なWebフロントエンド開発において「React（Next.js）」と「TypeScript」の組み合わせは、もはやデファクトスタンダード（事実上の標準）となっています。
+素のJavaScript（Vanilla JS）が持つ「実行するまでエラーが分からない」という恐怖から解放される圧倒的な安心感は、一度味わうと手放せないものです。
+
+しかし、いざTypeScriptを導入したものの、「型の記述量が多すぎて面倒だ」「コンパイラのエラ〜が赤文字で出て鬱陶しいから、とりあえず `any` 型を付けてエラーを握り潰している」というプロジェクトも後を絶ちません。
+
+この記事では、TypeScriptの強力な型推論を活かしながら、**「anyを使わずに、いかに安全で変更に強いReactコンポーネントを作るか」** について、3つのベストプラクティスを解説します。
+
+![TypeScriptとReactの融合](/images/ts-react.png)
+
+---
+
+## 1. Props（プロパティ）は interface ではなく type で定義し、直和型を活用する
+
+Reactコンポーネントに親から渡されるデータ（Props）の型を定義する際、`interface` よりも `type`（型エイリアス）を使用し、**「ユニオン型（直和型）」** を積極的に活用するのが最初の鉄則です。
+
+### 悪い例：状態の矛盾を生む不要なオプショナル
+よくある失敗が、1つのコンポーネントで「ボタン」や「リンク」など複数の役割を兼ねさせようとして、全てのプロパティに `?`（オプショナル：あってもなくても良い）を付けてしまうケースです。
+
+```tsx
+// ❌ 悪い例（矛盾するPropsが渡される危険性がある）
+interface ButtonProps {
+  label: string;
+  onClick?: () => void;  // ボタンとして使う時用
+  href?: string;         // リンクとして使う時用
+  variant?: 'primary' | 'secondary' | 'danger';
+}
+```
+この定義では、`<Button label="送信" onClick={...} href="/home" />` のように、onClickとhrefの両方が指定されてしまう**矛盾した状態**をコンパイラが防げません。
+
+### 良い例：ユニオン型で状態を厳密に制限する
+これを `type` のユニオン型（直和型）を使うことで、「onClickを持つボタンとしてのProps」と「hrefを持つリンクとしてのProps」を明確に分離し、矛盾を防ぎます。
+
+```tsx
+// ✅ 良い例
+type BaseProps = {
+  label: string;
+  variant?: 'primary' | 'secondary' | 'danger';
+};
+
+type ButtonAsButtonProps = BaseProps & {
+  as?: 'button';
+  onClick: () => void;
+  // ボタン時はhrefを強制的に禁止する（never）
+  href?: never; 
+};
+
+type ButtonAsLinkProps = BaseProps & {
+  as: 'a';
+  href: string;
+  onClick?: never;
+};
+
+// どちらかのPropsだけしか受け付けないようにする（排他的）
+type ButtonProps = ButtonAsButtonProps | ButtonAsLinkProps;
+```
+
+このように型定義にひと手間かけることで、間違った使い方をした開発者に対して、コンパイル時にエディタ（VS Codeなど）上で強力な赤い警告線を出し、バグを未然に防ぐことができます。
+
+## 2. 子供（children）を受け取るコンポーネントの厳格な型定義
+
+レイアウトなどのラッパーコンポーネントを作成する際、中身に任意の要素（テキストや他のコンポーネント）を入れるために `children` プロパティを使用します。
+
+### React 18以降の正しい `children` の型
+以前のReact（17まで）は `React.FC` という型を使えば自動的に `children` が含まれていましたが、React 18以降は明示的に記述する必要があります。
+
+```tsx
+import { ReactNode } from 'react';
+
+// 基本的に children は ReactNode 型を指定する
+type CardProps = {
+  title: string;
+  children: ReactNode; 
+};
+
+export const Card = ({ title, children }: CardProps) => {
+  return (
+    <div className="border rounded-md shadow-sm p-4">
+      <h2 className="text-xl font-bold border-b pb-2 mb-4">{title}</h2>
+      <div className="text-gray-700">
+        {children}
+      </div>
+    </div>
+  );
+};
+```
+ここで `ReactNode` を指定することで、中身が単なるプレーンテキスト（文字列）であっても、`<div>` などのタグの塊であっても、問題なくレンダリングされる安全なコンポーネントになります。
+
+## 3. 型アサーション（as）は「敗北宣言」である
+
+型定義が複雑になり、TypeScriptコンパイラが「これは `string` 型ではなく `null` かもしれない」とエラーを出してきたとします。
+この時、一番やってはいけない（しかしまず最初にやりたくなる）悪魔の囁きが **「型アサーション (`as`)」** です。
+
+```tsx
+// ❌ 悪い例
+const user = fetchUser();
+// TypeScript「userはundefinedかもしれないよ！」
+// 人間「今だけは絶対中身あるから大丈夫！」
+console.log((user as User).name); // 型を無理やり上書き（騙す）
+```
+
+`as` は、TypeScriptのコンパイラに対して「お前より俺（人間）の方が状況を分かっているから黙れ」と命令する危険な行為です。もし将来APIの仕様が変わり、本当に `user` が空っぽ（undefined）になった瞬間、ブラウザ上で真っ白なエラー画面がユーザーに表示されます（ランタイムエラー）。
+
+### 敗北を認めず、適切に「絞り込む（Type Guard）」
+安全なコードを書くためには、`as` を使うのではなく、`if`文などを利用してTypeScriptにコードの文脈を教える「型の絞り込み（Type Narrowing）」を行います。
+
+```tsx
+// ✅ 良い例
+const user = fetchUser(); // 型は User | undefined
+
+// オプショナルチェーンを使う（中身がない場合はundefinedを返す）
+console.log(user?.name); 
+
+// または初期ローディング・エラーハンドリングを行う
+if (!user) {
+  return <p>ユーザー情報を読み込み中、または取得できませんでした…</p>;
+}
+
+// この行に到達した時点で、TypeScriptは「userは絶対に存在している」と確実に推論してくれる
+console.log(user.name); 
+```
+
+## まとめ：「型」は未来の自分への最強のドキュメント
+
+ReactとTypeScriptの組み合わせが真価を発揮するのは、「コードを書き終わった半年後」です。
+
+過去の自分が書いた機能の改修に入った時、もしTypeScriptがなく全てが `any` 状態であれば、「このコンポーネントにはどんなデータを渡せばいいんだっけ？」「この変数は配列？それともただの文字列？」と、過去のコードを一行一行読み解く苦行が待っています。
+
+適切な「型（PropsやStateの定義）」が書かれていれば、VS Codeでホバーするだけで情報が表示され、間違ったデータを渡せばコンパイル時に即座に弾いてくれます。
+
+型を書く手間（数十秒）を惜しまず、堅牢な城壁を築き上げることで、結果的に「バグ調査」と「ドキュメント解読」という最も不毛な数時間を削減できるのです。
